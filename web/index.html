@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+</head>
+<body>
+<main id="app">
+    <template v-if="isLogin">
+        <p>用户列表</p>
+        <ul>
+            <li
+                    v-for="(item, index) of listUser"
+                    :key="index"
+            >{{item.username}}</li>
+        </ul>
+        <p>聊天记录</p>
+        <ul>
+            <li
+                    v-for="(item, index) of text"
+                    :key="index"
+            >{{item}}</li>
+        </ul>
+        <label>
+            <span>message:</span>
+            <input v-model="msg" />
+        </label>
+        <button @click="toSendMsg()">Send!</button>
+    </template>
+    <template v-else>
+        <label>
+            <span>用户名:</span>
+            <input maxlength="10" v-model="username">
+        </label>
+        <button @click="toLogin()">登陆</button>
+    </template>
+
+
+</main>
+<footer></footer>
+<script>
+    const app = new Vue({
+        data: {
+            listUser: [],
+            text: [],
+            ws: null,
+            msg: '',
+            username: '',
+            isLogin: false
+        },
+        methods: {
+            async init () {
+                await this.login()
+                this.createWs()
+            },
+            // ajax start
+            async login () {
+                await fetch(`http://${location.host}/user/login`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username: this.username,
+                        userid: Date.now()
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        this.isLogin = true
+                        this.listUser = (function () {
+                            let arr = []
+                            for (let keys of Object.keys(res.list)) {
+                                arr.push(res.list[keys])
+                            }
+                            return arr
+                        })()
+                    })
+            },
+            async exit () {},
+            // ajax end
+            createWs () {
+                this.ws = new WebSocket(`ws://${location.host}/ws/`)
+                this.ws.onopen = this.onopen
+                this.ws.onmessage = this.onmessage
+            },
+            toSendMsg () {
+                this.ws.send(this.msg + '')
+                this.msg = ''
+            },
+            toLogin () {
+                if (this.username) {
+                    this.init()
+                } else {
+                    alert('请输入用户名')
+                }
+
+            },
+            onopen () {
+                this.text.push('connect!')
+                this.ws.send(JSON.stringify({
+                    type: 'onconnect'
+                }))
+            },
+            onmessage (msg) {
+                try {
+                    const data = JSON.parse(msg.data)
+                    const typeMethod = {
+                        userList: () => {
+                            this.listUser = (function () {
+                                let arr = []
+                                for (let keys of Object.keys(data.list)) {
+                                    arr.push(data.list[keys])
+                                }
+                                return arr
+                            })()
+                        },
+                        msg: () => {
+                            this.text.push(data.msg)
+                        }
+                    }
+                    if (typeMethod[data.type]) {
+                        typeMethod[data.type]()
+                    }
+                } catch (e) {}
+            }
+        },
+        destroyed () {}
+    })
+    app.$mount('#app')
+</script>
+</body>
+</html>
