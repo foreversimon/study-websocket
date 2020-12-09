@@ -1,0 +1,21 @@
+* {
+    box-sizing: border-box;
+}
+
+html,body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    overflow: auto;
+    background: linear-gradient(to bottom, #c7eeee 0%, #F4F9F2 100%);
+}
+
+ul {
+    padding: 0;
+}
+ul li {
+    list-style: none;
+}
+p {
+    margin: 0;
+}

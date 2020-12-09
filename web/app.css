@@ -1,0 +1,67 @@
+.wrapper {
+    position: relative;
+    border: 1px solid #eee;
+}
+.send-btn {
+    z-index: 3;
+    position: absolute;
+    right: 5px;
+    top: 3px;
+}
+.title-name {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+.clearfix:after{
+    content:".";
+    display:block;
+    height:0;
+    clear:both;
+    visibility:hidden;
+}
+.message-box li {
+    margin-top: 8px;
+}
+.message-box li>span {
+    float: left;
+}
+.message-box li>div {
+    float: left;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+.message-box li>div:nth-child(2) {
+    height: 40px;
+    line-height: 40px;
+    font-weight: bold;
+}
+.message-box li>div:nth-child(3) {
+    line-height: 40px;
+    color: #333333;
+    border: 1px solid #eeeeee;
+    border-radius: 0 8px 8px 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: white;
+}
+.list-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #80ea61;
+    border-radius: 50%;
+}
+
+.login-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+    padding: 16px 24px;
+    width: 300px;
+    text-align: center;
+}

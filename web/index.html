@@ -3,42 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="app.css">
 </head>
 <body>
-<main id="app">
+<main id="app" style="height: 100%">
     <template v-if="isLogin">
-        <p>用户列表</p>
-        <ul>
-            <li
-                    v-for="(item, index) of listUser"
-                    :key="index"
-            >{{item.username}}</li>
-        </ul>
-        <p>聊天记录</p>
-        <ul>
-            <li
-                    v-for="(item, index) of text"
-                    :key="index"
-            >{{item}}</li>
-        </ul>
-        <label>
-            <span>message:</span>
-            <input v-model="msg" />
-        </label>
-        <button @click="toSendMsg()">Send!</button>
+        <el-container style="height: 100%;" class="wrapper">
+            <el-container class="wrapper">
+                <el-header class="wrapper title-name">欢迎 {{username}} !</el-header>
+                <el-main class="wrapper" style="background-color: #f3f2f4">
+                    <ul class="message-box">
+                        <li
+                            v-for="(item, index) of text"
+                            :key="index"
+                            class="clearfix"
+                        >
+                            <el-avatar icon="el-icon-user-solid"></el-avatar>
+                            <div :style="{
+                                color: item.color
+                            }">{{item.user}}</div>
+                            <transition>
+                                <div v-html="item.msg"></div>
+                            </transition>
+                        </li>
+                    </ul>
+                </el-main>
+                <el-footer height="249px" style="padding: 0" class="wrapper">
+                    <div>
+                        <wang-editor v-model="msg" @on-ok="toSendMsg"></wang-editor>
+                        <el-button type="text" class="send-btn" ref="sendBtn" @click="toSendMsg">发送</el-button>
+                    </div>
+                </el-footer>
+            </el-container>
+
+            <el-aside width="150px" class="wrapper">
+                <ul>
+                    <li
+                        v-for="(item, index) of listUser"
+                        :key="index"
+                        :style="{
+                            color: item.color
+                        }"
+                        style="padding-left: 8px"
+                    >
+                        <span class="list-dot"></span>
+                        {{item.username}}
+                    </li>
+                </ul>
+            </el-aside>
+        </el-container>
     </template>
     <template v-else>
-        <label>
-            <span>用户名:</span>
-            <input maxlength="10" v-model="username">
-        </label>
-        <button @click="toLogin()">登陆</button>
+        <div class="login-wrapper">
+            <el-form>
+                <el-form-item label="用户名:">
+                    <el-input size="small" style="width: 150px" maxlength="10" v-model="username"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-button size="small" @click="toLogin()" type="primary" style="float: right">登陆</el-button>
+        </div>
     </template>
 
 
 </main>
 <footer></footer>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+<script type="text/javascript" src="https://unpkg.com/wangeditor/dist/wangEditor.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="wangEditor.js"></script>
 <script>
     const app = new Vue({
         data: {
@@ -56,6 +92,7 @@
             },
             // ajax start
             async login () {
+                if (!this.username) return
                 await fetch(`http://${location.host}/user/login`, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -86,8 +123,10 @@
                 this.ws.onmessage = this.onmessage
             },
             toSendMsg () {
-                this.ws.send(this.msg + '')
-                this.msg = ''
+                this.ws.send(this.msg)
+                setTimeout(() => {
+                    this.msg = ''
+                })
             },
             toLogin () {
                 if (this.username) {
@@ -98,7 +137,7 @@
 
             },
             onopen () {
-                this.text.push('connect!')
+                this.text.push({msg: '<p>connect!</p>', user: this.username})
                 this.ws.send(JSON.stringify({
                     type: 'onconnect'
                 }))
@@ -117,7 +156,8 @@
                             })()
                         },
                         msg: () => {
-                            this.text.push(data.msg)
+                            const {user, msg: message, color} = JSON.parse(data.msg)
+                            this.text.push({user, msg: message, color})
                         }
                     }
                     if (typeMethod[data.type]) {
@@ -127,8 +167,7 @@
             }
         },
         destroyed () {}
-    })
-    app.$mount('#app')
+    }).$mount('#app')
 </script>
 </body>
 </html>

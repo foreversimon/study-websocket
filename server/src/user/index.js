@@ -12,6 +12,9 @@ function Login (req, res) {
     res.cookie('username', username, {
         maxAge: Date.now() + 86400000
     })
+    res.cookie('color', colorCan[Object.keys(users).length % 10], {
+        maxAge: Date.now() + 86400000
+    })
     global.users[userid] = {
         username,
         id: userid
