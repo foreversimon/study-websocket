@@ -14,7 +14,7 @@
         <el-container style="height: 100%;" class="wrapper">
             <el-container class="wrapper">
                 <el-header class="wrapper title-name">欢迎 {{username}} !</el-header>
-                <el-main class="wrapper" style="background-color: #f3f2f4">
+                <el-main class="wrapper" style="background-color: #f3f2f4" id="messageMain">
                     <ul class="message-box">
                         <li
                             v-for="(item, index) of text"
@@ -123,6 +123,7 @@
                 this.ws.onmessage = this.onmessage
             },
             toSendMsg () {
+                if (!this.msg) return
                 this.ws.send(this.msg)
                 setTimeout(() => {
                     this.msg = ''
@@ -158,6 +159,10 @@
                         msg: () => {
                             const {user, msg: message, color} = JSON.parse(data.msg)
                             this.text.push({user, msg: message, color})
+                            const messageMain = document.querySelector('#messageMain')
+                            this.$nextTick(() => {
+                                messageMain.scrollTop = messageMain.scrollHeight
+                            })
                         }
                     }
                     if (typeMethod[data.type]) {
